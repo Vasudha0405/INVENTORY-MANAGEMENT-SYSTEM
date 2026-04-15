@@ -18,12 +18,12 @@
 
 | Name | Role | GitHub |
 |------|------|--------|
-| **Vasudha** | Full Stack Developer | [@Vasudha0405](https://github.com/Vasudha0405) |
-| **Thejaswini M** | Full Stack Developer | — |
-| **Vidhula Shree Shankar** | Full Stack Developer | — |
-| **Vidya Mathad** | Full Stack Developer | [@vidyaMatadh](https://github.com/vidyaMatadh) |
-| **Yuktha D** | Full Stack Developer | — |
-| **Bharath M Gowda** | Full Stack Developer | — |
+| **Vasudha** | Scrum Master | [@Vasudha0405](https://github.com/Vasudha0405) |
+| **Thejaswini M** |  Customer(Product Owner) | — |
+| **Vidhula Shree Shankar** |  Developer | — |
+| **Vidya Mathad** |  Developer | [@vidyaMatadh](https://github.com/vidyaMatadh) |
+| **Yuktha D** |  Developer | — |
+| **Bharath M Gowda** | Tester | — |
 
 ---
 
