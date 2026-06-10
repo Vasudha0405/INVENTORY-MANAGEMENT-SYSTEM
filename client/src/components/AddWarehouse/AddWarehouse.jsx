@@ -2,6 +2,7 @@ import { useState } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { Link } from 'react-router-dom';
 import axios from 'axios';
+import { useAuth } from '../../context/AuthContext';
 
 // pages
 import './AddWarehouse.scss';
@@ -9,9 +10,9 @@ import './AddWarehouse.scss';
 import ArrowBack from '../../assets/Icons/arrow_back-24px.svg';
 import ErrorIcon from '../../assets/Icons/error-24px.svg';
 
-// regex phone number validation
+// regex phone number validation: +1(XXX)XXX-XXXX format
 const regexPhone = new RegExp(
-  /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/,
+  /^\+1\([0-9]{3}\)[0-9]{3}-[0-9]{4}$/,
   'im'
 );
 // regex email validation
@@ -24,6 +25,7 @@ export default function AddWarehouseForm() {
   const navigate = useNavigate();
   const handleClickCancel = () => navigate(-1);
   const [error, setError] = useState({});
+  const { token } = useAuth();
 
   // build new warehouse object to hold data, to be submitted to server
   const [formData, setFormData] = useState({
@@ -77,7 +79,7 @@ export default function AddWarehouseForm() {
     }
     if (!regexPhone.test(formData.contact_phone)) {
       isValid = false;
-      errors.contact_phone = 'This field is required';
+      errors.contact_phone = 'Phone must be in +1(XXX)XXX-XXXX format';
     }
     if (!regexEmail.test(formData.contact_email)) {
       isValid = false;
@@ -93,7 +95,9 @@ export default function AddWarehouseForm() {
     e.preventDefault();
     if (validateForm()) {
       const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
-      axios.post(`${API_URL}/warehouses`, formData)
+      axios.post(`${API_URL}/warehouses`, formData, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
         .then(response => {
           alert('Warehouse Added Successfully!');
           navigate(-1);

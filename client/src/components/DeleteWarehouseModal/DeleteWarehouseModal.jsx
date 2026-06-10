@@ -2,6 +2,7 @@ import React from "react";
 import "./DeleteWarehouseModal.scss";
 import closeImg from "../../assets/Icons/close-24px.svg";
 import axios from "axios";
+import { useAuth } from "../../context/AuthContext";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
 
@@ -13,6 +14,7 @@ const DeleteWarehouseModal = ({
   setSelectedWarehouseId,
   onDeleteSuccess,
 }) => {
+  const { token } = useAuth();
   // function for button - closing the modal
   const handleClose = () => {
     setSelectedWarehouseName(null);
@@ -23,7 +25,9 @@ const DeleteWarehouseModal = ({
   // function for button - deleting a warehouse
   const handleDelete = () => {
     axios
-      .delete(API_URL + "/warehouses/" + selectedWarehouseId)
+      .delete(API_URL + "/warehouses/" + selectedWarehouseId, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
       .then((response) => {
         setShowModal(false);
         setSelectedWarehouseName(null);

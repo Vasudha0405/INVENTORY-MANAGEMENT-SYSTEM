@@ -6,6 +6,7 @@ import searchImg from "../../assets/Icons/search-24px.svg";
 import deleteImg from "../../assets/Icons/delete_outline-24px.svg";
 import editImg from "../../assets/Icons/edit-24px.svg";
 import chevronImg from "../../assets/Icons/chevron_right-24px.svg";
+import { useAuth } from "../../context/AuthContext";
 
 function WarehouseList({
   warehousesList,
@@ -13,6 +14,7 @@ function WarehouseList({
   setSelectedWarehouseName,
   setSelectedWarehouseId,
 }) {
+  const { isEmployee } = useAuth();
   const columnHeaderArray = [
     "Warehouse",
     "Address",
@@ -45,11 +47,13 @@ function WarehouseList({
             <img src={searchImg} alt="sort icon" />
           </div>
           <div className="warehouses-title-block__add warehouses-tablet-view">
-            <Link to={`/warehouse/add`}>
-              <button className="warehouses-title-block__add-button">
-                + Add New Warehouse
-              </button>
-            </Link>
+            {isEmployee && (
+              <Link to={`/warehouse/add`}>
+                <button className="warehouses-title-block__add-button">
+                  + Add New Warehouse
+                </button>
+              </Link>
+            )}
           </div>
         </div>
       </div>
@@ -68,11 +72,13 @@ function WarehouseList({
             </div>
 
             <div className="warehouses-search-block__add">
-              <Link to={`/warehouse/add`}>
-                <button className="warehouses-search-block__add-button">
-                  + Add New Warehouse
-                </button>
-              </Link>
+              {isEmployee && (
+                <Link to={`/warehouse/add`}>
+                  <button className="warehouses-search-block__add-button">
+                    + Add New Warehouse
+                  </button>
+                </Link>
+              )}
             </div>
           </div>
           <div className="warehouses-sort-block">
@@ -153,25 +159,29 @@ function WarehouseList({
 
                 <div className="warehouses-items-block__mobile-block-2">
                   <div className="warehouses-items-block__warehouse-actions">
-                    <div className="warehouses-items-block__warehouse-actions-delete">
-                      <div className="warehouses-items-block__warehouse-actions-delete">
-                        <img
-                          src={deleteImg}
-                          alt="delete icon"
-                          onClick={() =>
-                            handleDeleteWarehouse(
-                              warehouse.warehouse_name,
-                              warehouse.id
-                            )
-                          }
-                        />
-                      </div>
-                    </div>
-                    <Link to={`/warehouse/${warehouse.id}/edit`}>
-                      <div className="warehouses-items-block__warehouse-actions-edit">
-                        <img src={editImg} alt="edit icon" />
-                      </div>
-                    </Link>
+                    {isEmployee && (
+                      <>
+                        <div className="warehouses-items-block__warehouse-actions-delete">
+                          <div className="warehouses-items-block__warehouse-actions-delete">
+                            <img
+                              src={deleteImg}
+                              alt="delete icon"
+                              onClick={() =>
+                                handleDeleteWarehouse(
+                                  warehouse.warehouse_name,
+                                  warehouse.id
+                                )
+                              }
+                            />
+                          </div>
+                        </div>
+                        <Link to={`/warehouse/${warehouse.id}/edit`}>
+                          <div className="warehouses-items-block__warehouse-actions-edit">
+                            <img src={editImg} alt="edit icon" />
+                          </div>
+                        </Link>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

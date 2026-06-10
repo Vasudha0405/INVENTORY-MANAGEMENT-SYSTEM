@@ -597,3 +597,40 @@
     border: none;
   }
 }
+
+.title-block__filter {
+  @include tablet {
+    margin-right: 1rem;
+    margin-bottom: 0.4rem;
+  }
+
+  &-select {
+    padding: 0.4rem 1rem;
+    border: 1px solid var(--Cloud);
+    border-radius: 1.25rem;
+    font-size: 0.8rem;
+    background: white;
+    cursor: pointer;
+    outline: none;
+
+    @include desktop {
+      font-size: 0.875rem;
+      padding: 0.5rem 1rem;
+    }
+  }
+}
+
+.search-block__filter {
+  margin-bottom: 0.75rem;
+
+  &-select {
+    width: 100%;
+    padding: 0.5rem 1rem;
+    border: 1px solid var(--Cloud);
+    border-radius: 1.25rem;
+    font-size: 0.875rem;
+    background: white;
+    cursor: pointer;
+    outline: none;
+  }
+}

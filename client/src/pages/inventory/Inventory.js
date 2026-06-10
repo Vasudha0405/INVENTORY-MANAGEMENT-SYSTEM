@@ -1,5 +1,5 @@
 import "./Inventory.scss";
-import { useState, useEffect } from "react";
+import { useState, useEffect, useMemo } from "react";
 import axios from "axios";
 import InventoryList from "../../components/InventoryList/InventoryList";
 import DeleteInventoryModal from "../../components/DeleteInventoryModal/DeleteInventoryModal";
@@ -13,9 +13,10 @@ function Inventory() {
   const [selectedInventoryId, setSelectedInventoryId] = useState(null);
   const [showModal, setShowModal] = useState(false);
   const [viewWidth, setViewWidth] = useState(window.innerWidth);
+  const [searchQuery, setSearchQuery] = useState("");
+  const [categoryFilter, setCategoryFilter] = useState("");
 
   // This useEffect is used to set the viewWidth state to the current window width
-  // It is used help determine whether the modal should take the full screen (for mobile) or not
   useEffect(() => {
     const resize = () => setViewWidth(window.innerWidth);
     window.addEventListener("resize", resize);
@@ -42,21 +43,44 @@ function Inventory() {
     fetchInventories();
   }, []);
 
+  // Get unique categories for filter dropdown
+  const categories = useMemo(() => {
+    const cats = [...new Set(inventoryList.map((item) => item.category))];
+    return cats.sort();
+  }, [inventoryList]);
+
+  // Filter inventory based on search and category
+  const filteredInventory = useMemo(() => {
+    return inventoryList.filter((item) => {
+      const matchesSearch = item.item_name
+        .toLowerCase()
+        .includes(searchQuery.toLowerCase());
+      const matchesCategory = categoryFilter
+        ? item.category === categoryFilter
+        : true;
+      return matchesSearch && matchesCategory;
+    });
+  }, [inventoryList, searchQuery, categoryFilter]);
+
   return (
     <>
       {!showModal ? (
         !isLoading ? (
           <InventoryList
-            inventoryList={inventoryList}
+            inventoryList={filteredInventory}
             setSelectedInventoryName={setSelectedInventoryName}
             setSelectedInventoryId={setSelectedInventoryId}
             setShowModal={setShowModal}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            categoryFilter={categoryFilter}
+            setCategoryFilter={setCategoryFilter}
+            categories={categories}
           />
         ) : (
           <div className="isLoading">Loading...</div>
         )
       ) : viewWidth < 768 ? (
-        // This is the mobile version of the modal
         <DeleteInventoryModal
           selectedInventoryName={selectedInventoryName}
           selectedInventoryId={selectedInventoryId}
@@ -76,10 +100,15 @@ function Inventory() {
             onDeleteSuccess={fetchInventories}
           />{" "}
           <InventoryList
-            inventoryList={inventoryList}
+            inventoryList={filteredInventory}
             setSelectedInventoryName={setSelectedInventoryName}
             setSelectedInventoryId={setSelectedInventoryId}
             setShowModal={setShowModal}
+            searchQuery={searchQuery}
+            setSearchQuery={setSearchQuery}
+            categoryFilter={categoryFilter}
+            setCategoryFilter={setCategoryFilter}
+            categories={categories}
           />
         </>
       ) : (

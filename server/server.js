@@ -18,6 +18,9 @@ app.use(express.static('public'));
 
 // setting up routes
 
+const authRoutes = require("./routes/auth");
+app.use("/auth", authRoutes);
+
 const warehousesRoutes = require("./routes/warehouses");
 app.use("/warehouses", warehousesRoutes);
 

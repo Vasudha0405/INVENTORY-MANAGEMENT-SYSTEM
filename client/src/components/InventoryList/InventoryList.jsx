@@ -6,13 +6,20 @@ import searchImg from '../../assets/Icons/search-24px.svg';
 import deleteImg from '../../assets/Icons/delete_outline-24px.svg';
 import editImg from '../../assets/Icons/edit-24px.svg';
 import chevronImg from '../../assets/Icons/chevron_right-24px.svg';
+import { useAuth } from '../../context/AuthContext';
 
 function InventoryList({
   inventoryList,
   setShowModal,
   setSelectedInventoryName,
   setSelectedInventoryId,
+  searchQuery,
+  setSearchQuery,
+  categoryFilter,
+  setCategoryFilter,
+  categories,
 }) {
+  const { isEmployee } = useAuth();
   const columnHeaderArray = [
     'Inventory Item',
     'Category',
@@ -45,17 +52,34 @@ function InventoryList({
               className="title-block__search-bar"
               id="home-search-bar"
               placeholder="Search..."
+              value={searchQuery || ''}
+              onChange={(e) => setSearchQuery && setSearchQuery(e.target.value)}
             />
             <img src={searchImg} alt="sort icon" />
           </div>
 
-          <div className="title-block__add tablet-view">
-            <Link to={`/inventory/add`}>
-              <button className="title-block__add-button">
-                + Add New Item
-              </button>
-            </Link>
+          <div className="title-block__filter tablet-view">
+            <select
+              className="title-block__filter-select"
+              value={categoryFilter || ''}
+              onChange={(e) => setCategoryFilter && setCategoryFilter(e.target.value)}
+            >
+              <option value="">All Categories</option>
+              {categories && categories.map((cat) => (
+                <option key={cat} value={cat}>{cat}</option>
+              ))}
+            </select>
           </div>
+
+          {isEmployee && (
+            <div className="title-block__add tablet-view">
+              <Link to={`/inventory/add`}>
+                <button className="title-block__add-button">
+                  + Add New Item
+                </button>
+              </Link>
+            </div>
+          )}
         </div>
       </div>
 
@@ -68,17 +92,34 @@ function InventoryList({
                 className="search-block__search-bar"
                 id="home-search-bar"
                 placeholder="Search..."
+                value={searchQuery || ''}
+                onChange={(e) => setSearchQuery && setSearchQuery(e.target.value)}
               />
               <img src={searchImg} alt="sort icon" />
             </div>
 
-            <div className="search-block__add">
-              <Link to={`/inventory/add`}>
-                <button className="search-block__add-button">
-                  + Add New Item
-                </button>
-              </Link>
+            <div className="search-block__filter">
+              <select
+                className="search-block__filter-select"
+                value={categoryFilter || ''}
+                onChange={(e) => setCategoryFilter && setCategoryFilter(e.target.value)}
+              >
+                <option value="">All Categories</option>
+                {categories && categories.map((cat) => (
+                  <option key={cat} value={cat}>{cat}</option>
+                ))}
+              </select>
             </div>
+
+            {isEmployee && (
+              <div className="search-block__add">
+                <Link to={`/inventory/add`}>
+                  <button className="search-block__add-button">
+                    + Add New Item
+                  </button>
+                </Link>
+              </div>
+            )}
           </div>
 
           <div className="sort-block">
@@ -169,23 +210,27 @@ function InventoryList({
 
                 <div className="inventory-block__mobile-block-2">
                   <div className="inventory-block__inventory-actions">
-                    <div className="inventory-block__inventory-actions-delete">
-                      <img
-                        src={deleteImg}
-                        alt="delete icon"
-                        onClick={() =>
-                          handleDeleteInventory(
-                            inventoryItem.item_name,
-                            inventoryItem.id
-                          )
-                        }
-                      />
-                    </div>
-                    <Link to={`/inventory/${inventoryItem.id}/edit`}>
-                      <div className="inventory-block__inventory-actions-edit">
-                        <img src={editImg} alt="edit icon" />
-                      </div>
-                    </Link>
+                    {isEmployee && (
+                      <>
+                        <div className="inventory-block__inventory-actions-delete">
+                          <img
+                            src={deleteImg}
+                            alt="delete icon"
+                            onClick={() =>
+                              handleDeleteInventory(
+                                inventoryItem.item_name,
+                                inventoryItem.id
+                              )
+                            }
+                          />
+                        </div>
+                        <Link to={`/inventory/${inventoryItem.id}/edit`}>
+                          <div className="inventory-block__inventory-actions-edit">
+                            <img src={editImg} alt="edit icon" />
+                          </div>
+                        </Link>
+                      </>
+                    )}
                   </div>
                 </div>
               </div>

@@ -2,6 +2,7 @@ import React from "react";
 import "./DeleteInventoryModal.scss";
 import closeImg from "../../assets/Icons/close-24px.svg";
 import axios from "axios";
+import { useAuth } from "../../context/AuthContext";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
 
@@ -13,6 +14,7 @@ const DeleteInventoryModal = ({
   setSelectedInventoryId,
   onDeleteSuccess,
 }) => {
+  const { token } = useAuth();
   // function for button - closing the modal
   const handleClose = () => {
     setSelectedInventoryName(null);
@@ -23,7 +25,9 @@ const DeleteInventoryModal = ({
   // function for button - deleting an inventory item
   const handleDelete = () => {
     axios
-      .delete(API_URL + "/inventories/" + selectedInventoryId)
+      .delete(API_URL + "/inventories/" + selectedInventoryId, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
       .then((response) => {
         setShowModal(false);
         setSelectedInventoryName(null);

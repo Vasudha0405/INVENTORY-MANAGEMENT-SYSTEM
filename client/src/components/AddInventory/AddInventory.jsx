@@ -3,9 +3,12 @@ import InputComponent from "../Input/Input";
 import DropdownSelect from "../Dropdown/Dropdown";
 import RadioButtons from "../RadioButton/RadioButton";
 import ButtonEl from "../Button/Button";
-import { useState, useRef } from "react";
+import { useState, useRef, useEffect } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
+
+const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
 /**
  *
  * @param {*} props
@@ -15,7 +18,23 @@ import { useParams, useNavigate } from "react-router-dom";
 function AddInventory(props) {
 	const params = useParams();
 	const navigate = useNavigate();
+	const { token } = useAuth();
 	const [showQuantity, setShowQuantity] = useState(true);
+	const [warehouseList, setWarehouseList] = useState([]);
+	const [warehouseMap, setWarehouseMap] = useState({});
+
+	useEffect(() => {
+		axios.get(`${API_URL}/warehouses`)
+			.then((res) => {
+				const names = res.data.map((w) => w.warehouse_name);
+				const map = {};
+				res.data.forEach((w) => { map[w.warehouse_name] = w.id; });
+				setWarehouseList(["Please select a Warehouse", ...names]);
+				setWarehouseMap(map);
+			})
+			.catch((err) => console.error("Error fetching warehouses:", err));
+	}, []);
+
 	let formData = useRef({
 		warehouse_id: "",
 		item_name: "",
@@ -31,18 +50,7 @@ function AddInventory(props) {
 
 	const setWarehouseId = (newFormData) => {
 		const warehouse_name = newFormData.warehouse_name;
-		const warehouses = {
-			Manhattan: 1,
-			Washington: 2,
-			Jersey: 3,
-			SF: 4,
-			"Santa Monica": 5,
-			Seattle: 6,
-			Miami: 7,
-			Boston: 8,
-		};
-
-		const id = warehouses[warehouse_name];
+		const id = warehouseMap[warehouse_name];
 		setFormData({ ...formData.current, ["warehouse_id"]: id });
 	};
 
@@ -59,9 +67,10 @@ function AddInventory(props) {
 	};
 
 	const postData = async (postFormData) => {
-		const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
 		axios
-			.post(`${API_URL}/inventories/`, postFormData)
+			.post(`${API_URL}/inventories/`, postFormData, {
+				headers: { Authorization: `Bearer ${token}` },
+			})
 			.then((res) => {
 				alert(`Item has been added successfully!`);
 				navigate('/inventory');
@@ -83,19 +92,9 @@ function AddInventory(props) {
 		
 		// Wait a moment for state to update, then get the updated formData
 		const updatedFormData = { ...formData.current };
-		const warehouses = {
-			Manhattan: 1,
-			Washington: 2,
-			Jersey: 3,
-			SF: 4,
-			"Santa Monica": 5,
-			Seattle: 6,
-			Miami: 7,
-			Boston: 8,
-		};
 		
-		if (updatedFormData.warehouse_name && warehouses[updatedFormData.warehouse_name]) {
-			updatedFormData.warehouse_id = warehouses[updatedFormData.warehouse_name];
+		if (updatedFormData.warehouse_name && warehouseMap[updatedFormData.warehouse_name]) {
+			updatedFormData.warehouse_id = warehouseMap[updatedFormData.warehouse_name];
 		}
 		
 		console.log(updatedFormData);
@@ -212,17 +211,7 @@ function AddInventory(props) {
 
 									<DropdownSelect
 										labelName='Warehouse'
-										items={[
-											"Please select a Warehouse",
-											"Manhattan",
-											"Washington",
-											"Jersey",
-											"SF",
-											"Santa Monica",
-											"Seattle",
-											"Miami",
-											"Boston",
-										]}
+										items={warehouseList}
 										defaultValue='Please select a Warehouse'
 										error={false}
 										fieldName='warehouse_name'

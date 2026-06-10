@@ -63,9 +63,9 @@
 ## 🛠️ Tech Stack
 
 | Layer | Technology |
-|-------|-----------|
+|-------|------------|
 | Frontend | React.js, React Router v6, Axios, SASS/BEM |
-| Backend | Node.js, Express.js |
+| Backend | Node.js, Express.js, JWT (jsonwebtoken), bcryptjs |
 | Database | MySQL with Knex.js ORM |
 | Tools | Postman, Jira, Figma, Git/GitHub |
 
@@ -73,11 +73,19 @@
 
 ## ✨ Features
 
+- **Role-Based Authentication** — Login/Signup with two roles:
+  - **Employee**: Full CRUD access (add, edit, delete warehouses and inventory)
+  - **User**: View-only access with search and filter capabilities
+- JWT-based authentication with protected API routes
+- Employee signup requires `@instock.com` email domain
 - View all warehouses and inventory items
-- Add, edit, and delete warehouses
-- Add, edit, and delete inventory items
+- Add, edit, and delete warehouses (Employee only)
+- Add, edit, and delete inventory items (Employee only)
+- Search inventory by item name
+- Filter inventory by category
+- Dynamic warehouse dropdown (auto-updates when warehouses are added/removed)
 - View inventory list per warehouse
-- Real-time validation on all forms
+- Real-time validation on all forms (phone format: `+1(XXX)XXX-XXXX`)
 - Responsive design for all screen sizes
 - Full CRUD REST API backend
 
@@ -181,24 +189,30 @@ Open your browser at **[http://localhost:3000](http://localhost:3000)**
 
 ## 🌐 API Endpoints
 
-### Warehouses
+### Authentication
 | Method | Endpoint | Description |
 |--------|----------|-------------|
-| GET | `/warehouses` | List all warehouses |
-| GET | `/warehouses/:id` | Get a single warehouse |
-| GET | `/warehouses/:id/inventories` | Get inventory for a warehouse |
-| POST | `/warehouses` | Add a new warehouse |
-| PUT | `/warehouses/:id` | Update a warehouse |
-| DELETE | `/warehouses/:id` | Delete a warehouse |
+| POST | `/auth/signup` | Register a new user (employee requires `@instock.com` email) |
+| POST | `/auth/login` | Login and receive JWT token |
+
+### Warehouses
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/warehouses` | List all warehouses | No |
+| GET | `/warehouses/:id` | Get a single warehouse | No |
+| GET | `/warehouses/:id/inventories` | Get inventory for a warehouse | No |
+| POST | `/warehouses` | Add a new warehouse | Employee |
+| PUT | `/warehouses/:id` | Update a warehouse | Employee |
+| DELETE | `/warehouses/:id` | Delete a warehouse | Employee |
 
 ### Inventories
-| Method | Endpoint | Description |
-|--------|----------|-------------|
-| GET | `/inventories` | List all inventory items |
-| GET | `/inventories/:id` | Get a single inventory item |
-| POST | `/inventories` | Add a new inventory item |
-| PUT | `/inventories/:id` | Update an inventory item |
-| DELETE | `/inventories/:id` | Delete an inventory item |
+| Method | Endpoint | Description | Auth Required |
+|--------|----------|-------------|---------------|
+| GET | `/inventories` | List all inventory items | No |
+| GET | `/inventories/:id` | Get a single inventory item | No |
+| POST | `/inventories` | Add a new inventory item | Employee |
+| PUT | `/inventories/:id` | Update an inventory item | Employee |
+| DELETE | `/inventories/:id` | Delete an inventory item | Employee |
 
 ---
 
@@ -227,15 +241,23 @@ INVENTORY-MANAGEMENT-SYSTEM/
 │   │   │   └── WarehouseList/
 │   │   ├── pages/
 │   │   │   ├── home/              # Warehouses page
-│   │   │   └── inventory/         # Inventory page
+│   │   │   ├── inventory/         # Inventory page
+│   │   │   ├── Login/             # Login page
+│   │   │   └── Signup/            # Signup page
+│   │   ├── context/
+│   │   │   └── AuthContext.js     # Auth state management
 │   │   └── App.jsx
 │   ├── .env.sample
 │   └── package.json
 ├── server/                        # Node.js backend
 │   ├── controllers/
+│   │   ├── auth-controller.js     # Login/Signup logic
 │   │   ├── warehouses-controller.js
 │   │   └── inventories-controller.js
+│   ├── middleware/
+│   │   └── auth.js                # JWT auth & role middleware
 │   ├── routes/
+│   │   ├── auth.js
 │   │   ├── warehouses.js
 │   │   └── inventories.js
 │   ├── migrations/                # Knex DB migrations
@@ -250,6 +272,17 @@ INVENTORY-MANAGEMENT-SYSTEM/
 ├── SETUP.md                       # Quick setup guide
 └── README.md
 ```
+
+---
+
+## 🔐 Default Credentials
+
+After running seeds, two demo accounts are available:
+
+| Role | Email | Password |
+|------|-------|----------|
+| Employee | `employee@instock.com` | `password123` |
+| User | `user@instock.com` | `password123` |
 
 ---
 

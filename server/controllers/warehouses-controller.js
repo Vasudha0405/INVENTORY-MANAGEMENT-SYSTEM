@@ -90,9 +90,9 @@ const deleteWarehouse = (req, res) => {
 
 // ---------- ADD NEW WAREHOUSE (POST) ----------
 const createWarehouse = (req, res) => {
-  // regex phone number validation
+  // regex phone number validation: +1(XXX)XXX-XXXX format
   const regexPhone = new RegExp(
-    /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/,
+    /^\+1\([0-9]{3}\)[0-9]{3}-[0-9]{4}$/,
     'im'
   );
 
@@ -157,9 +157,9 @@ const updateWarehouse = (req, res) => {
     contact_email,
   } = req.body;
 
-  // regex phone number validation
+  // regex phone number validation: +1(XXX)XXX-XXXX format
   const regexPhone = new RegExp(
-    /^[\+]?[(]?[0-9]{3}[)]?[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/,
+    /^\+1\([0-9]{3}\)[0-9]{3}-[0-9]{4}$/,
     'im'
   );
 

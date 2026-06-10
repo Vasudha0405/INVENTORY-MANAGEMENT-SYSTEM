@@ -7,26 +7,21 @@ import ButtonEl from "../Button/Button";
 import { useEffect, useState, useRef } from "react";
 import axios from "axios";
 import { useParams, useNavigate } from "react-router-dom";
+import { useAuth } from "../../context/AuthContext";
 
 const API_URL = process.env.REACT_APP_API_URL || "http://localhost:8080";
 
-const WAREHOUSES = {
-  Manhattan: 1,
-  Washington: 2,
-  Jersey: 3,
-  SF: 4,
-  "Santa Monica": 5,
-  Seattle: 6,
-  Miami: 7,
-  Boston: 8,
-};
+const WAREHOUSES = {};
 
 function EditInventory(props) {
   const params = useParams();
   const navigate = useNavigate();
+  const { token } = useAuth();
   const [itemData, setItemData] = useState(null);
   const [isLoading, setIsLoading] = useState(true);
   const [showQuantity, setShowQuantity] = useState(true);
+  const [warehouseNames, setWarehouseNames] = useState([]);
+  const [warehouseMap, setWarehouseMap] = useState(WAREHOUSES);
 
   let formData = useRef({
     item_name: "",
@@ -44,28 +39,40 @@ function EditInventory(props) {
 
   const fetchData = async () => {
     setIsLoading(true);
-    axios
-      .get(`${API_URL}/inventories/${params.itemId}`)
-      .then((res) => {
-        const item = res.data[0];
-        setItemData(item);
-        setFormData({
-          ...formData.current,
-          item_name: item.item_name,
-          description: item.description,
-          category: item.category,
-          status: item.status,
-          quantity: item.quantity,
-          warehouse_name: item.warehouse_name,
-          warehouse_id: WAREHOUSES[item.warehouse_name] || item.warehouse_id,
-        });
-        setShowQuantity(item.status === "In Stock");
-        setIsLoading(false);
-      })
-      .catch((err) => {
-        console.error(`Error fetching inventory item: ${err}`);
-        setIsLoading(false);
+    try {
+      const [itemRes, whRes] = await Promise.all([
+        axios.get(`${API_URL}/inventories/${params.itemId}`),
+        axios.get(`${API_URL}/warehouses`),
+      ]);
+
+      // Build warehouse map
+      const map = {};
+      const names = [];
+      whRes.data.forEach((w) => {
+        map[w.warehouse_name] = w.id;
+        names.push(w.warehouse_name);
       });
+      setWarehouseMap(map);
+      setWarehouseNames(names);
+
+      const item = itemRes.data[0];
+      setItemData(item);
+      setFormData({
+        ...formData.current,
+        item_name: item.item_name,
+        description: item.description,
+        category: item.category,
+        status: item.status,
+        quantity: item.quantity,
+        warehouse_name: item.warehouse_name,
+        warehouse_id: map[item.warehouse_name] || item.warehouse_id,
+      });
+      setShowQuantity(item.status === "In Stock");
+      setIsLoading(false);
+    } catch (err) {
+      console.error(`Error fetching data: ${err}`);
+      setIsLoading(false);
+    }
   };
 
   useEffect(() => {
@@ -78,8 +85,8 @@ function EditInventory(props) {
     const currentData = { ...formData.current };
 
     // Resolve warehouse_id from warehouse_name
-    if (currentData.warehouse_name && WAREHOUSES[currentData.warehouse_name]) {
-      currentData.warehouse_id = WAREHOUSES[currentData.warehouse_name];
+    if (currentData.warehouse_name && warehouseMap[currentData.warehouse_name]) {
+      currentData.warehouse_id = warehouseMap[currentData.warehouse_name];
     }
 
     // Validate required fields
@@ -109,7 +116,9 @@ function EditInventory(props) {
     };
 
     axios
-      .put(`${API_URL}/inventories/${params.itemId}`, payload)
+      .put(`${API_URL}/inventories/${params.itemId}`, payload, {
+        headers: { Authorization: `Bearer ${token}` },
+      })
       .then((res) => {
         alert("Item updated successfully!");
         navigate(-1);
@@ -211,16 +220,7 @@ function EditInventory(props) {
 
                   <DropdownSelect
                     labelName='Warehouse'
-                    items={[
-                      "Manhattan",
-                      "Washington",
-                      "Jersey",
-                      "SF",
-                      "Santa Monica",
-                      "Seattle",
-                      "Miami",
-                      "Boston",
-                    ]}
+                    items={warehouseNames}
                     defaultValue={itemData.warehouse_name}
                     fieldName='warehouse_name'
                   />

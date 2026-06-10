@@ -5,6 +5,7 @@ import { Link } from 'react-router-dom';
 import { useNavigate } from 'react-router-dom';
 import { v4 as uuidv4 } from 'uuid';
 import axios from 'axios';
+import { useAuth } from '../../context/AuthContext';
 
 // pages
 import './EditWarehouse.scss';
@@ -12,9 +13,9 @@ import './EditWarehouse.scss';
 import ArrowBack from '../../assets/Icons/arrow_back-24px.svg';
 import ErrorIcon from '../../assets/Icons/error-24px.svg';
 
-// regex phone number validation
+// regex phone number validation: +1(XXX)XXX-XXXX format
 const regexPhone = new RegExp(
-  /^(\+?[0-9]{1,2}\s?)?(\([0-9]{3}\)|[0-9]{3})[-\s\.]?[0-9]{3}[-\s\.]?[0-9]{4,6}$/,
+  /^\+1\([0-9]{3}\)[0-9]{3}-[0-9]{4}$/,
   'im'
 );
 
@@ -28,6 +29,7 @@ export default function EditWarehouseForm() {
   const navigate = useNavigate();
   const { warehouse_id } = useParams()
   const handleClickCancel = () => navigate(-1);
+  const { token } = useAuth();
 
   // piece of state that holds an object of error messages
   const [error, setError] = useState({});
@@ -84,7 +86,7 @@ export default function EditWarehouseForm() {
     }
     if (!regexPhone.test(formData.contact_phone)) {
       isValid = false;
-      errors.contact_phone = 'This field is required';
+      errors.contact_phone = 'Phone must be in +1(XXX)XXX-XXXX format';
     }
     if (!regexEmail.test(formData.contact_email)) {
       isValid = false;
@@ -113,7 +115,9 @@ export default function EditWarehouseForm() {
     if (validateForm()) {
       const API_URL = process.env.REACT_APP_API_URL || 'http://localhost:8080';
       axios
-        .put(`${API_URL}/warehouses/${warehouse_id}`, formData)
+        .put(`${API_URL}/warehouses/${warehouse_id}`, formData, {
+          headers: { Authorization: `Bearer ${token}` },
+        })
         .then((response) => {
           alert('Warehouse Updated Successfully!');
           navigate(-1);
